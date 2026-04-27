@@ -68,13 +68,6 @@ function doMove(state, turn, row, col) {
     newState[row][col] = turn
     return newState
 }
-class Node {
-    constructor(state, parent, turn, row, col) {
-        this.state = state
-        this.parent = parent
-        this.action = [turn, row, col]
-    }
-}
 
 function actions(state) {
     let actions_list = []
@@ -88,7 +81,7 @@ function actions(state) {
     return actions_list
 }
 
-function think(state, turn, parent) {
+function think(state, turn) {
     const stateResult = hasEnded(state)
     if (stateResult != -2) {
         return [stateResult, -1, -1]
@@ -99,8 +92,7 @@ function think(state, turn, parent) {
     let action_value = turn * -1 * Infinity
     for (let a = 0; a < actions_list.length; a++) {
         const nodeState = doMove(state, turn, actions_list[a][0], actions_list[a][1])
-        const node = new Node(nodeState, parent, turn, actions_list[a][0], actions_list[a][1])
-        const nodeVal = think(nodeState, turn * -1, node)
+        const nodeVal = think(nodeState, turn * -1)
         if (turn == 1 && nodeVal[0] > action_value) {
             action_value = nodeVal[0]
             action_i = a
@@ -166,7 +158,7 @@ while ((result = hasEnded(game)) == -2) {
                 game = doMove(game, turn, row, col)
             }
         } else {
-            let analysis = think(game, turn, null)
+            let analysis = think(game, turn)
             game = doMove(game, turn, analysis[1], analysis[2])
         }
     }
