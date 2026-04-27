@@ -81,28 +81,29 @@ function actions(state) {
     return actions_list
 }
 
-function think(state, turn) {
+function think(state, turn, difficulty, ai_turn) {
     const stateResult = hasEnded(state)
     if (stateResult != -2) {
         return [stateResult, -1, -1]
     }
 
     let actions_list = actions(state)
-    let action_i = 0
-    let action_value = turn * -1 * Infinity
+    let actions_parsed = []
     for (let a = 0; a < actions_list.length; a++) {
         const nodeState = doMove(state, turn, actions_list[a][0], actions_list[a][1])
-        const nodeVal = think(nodeState, turn * -1)
-        if (turn == 1 && nodeVal[0] > action_value) {
-            action_value = nodeVal[0]
-            action_i = a
-        } else if (turn == -1 && nodeVal[0] < action_value) {
-            action_value = nodeVal[0]
-            action_i = a
-        }
+        const nodeVal = think(nodeState, turn * -1, difficulty, ai_turn)
+        actions_parsed.push([nodeVal[0], actions_list[a][0], actions_list[a][1]])
     }
-
-    return [action_value, actions_list[action_i][0], actions_list[action_i][1]]
+    actions_parsed = actions_parsed.sort((a, b) => b[0] - a[0])
+    let action_i = 0
+    if (turn == 1 && turn == ai_turn) {
+        action_i = Math.round((actions_parsed.length - 1) * (1 - difficulty))
+    } else if (turn == -1 && turn == ai_turn) {
+        action_i = Math.round((actions_parsed.length - 1) * difficulty)
+    } else if (turn == -1) {
+        action_i = actions_parsed.length - 1
+    }
+    return actions_parsed[action_i]
 }
 
 
@@ -113,6 +114,14 @@ const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 })
+
+const str_difficulty = await rl.question('Choose difficulty [0-100]: ')
+if (!/^0*([0-9]|[1-9][0-9]|100)$/.test(str_difficulty)) {
+    console.log("invalid option")
+    exit(1)
+}
+
+const difficulty = Math.max(0, Math.min(1, parseInt(str_difficulty) * 0.01))
 
 const option = (await rl.question('Choose your side [x/o]: ')).toUpperCase()
 if (!['X', 'O'].includes(option)) {
@@ -158,7 +167,8 @@ while ((result = hasEnded(game)) == -2) {
                 game = doMove(game, turn, row, col)
             }
         } else {
-            let analysis = think(game, turn)
+            let analysis = think(game, turn, difficulty, AISide)
+            console.log(analysis)
             game = doMove(game, turn, analysis[1], analysis[2])
         }
     }
