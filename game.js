@@ -153,7 +153,7 @@ while ((result = hasEnded(game)) == -2) {
         if (turns_played == 0) {
             let move = Math.round(Math.random() * 8)
             let row = Math.floor(move / 3)
-            let col = (move / 3 - row) * 3
+            let col = Math.round((move / 3 - row) * 3)
             if (row >= 0 && row <= 2 && col >= 0 && col <= 2) {
                 game = doMove(game, turn, row, col)
             }
