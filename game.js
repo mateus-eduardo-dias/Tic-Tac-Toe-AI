@@ -88,7 +88,7 @@ function actions(state) {
     return actions_list
 }
 
-function test(state, turn, parent) {
+function think(state, turn, parent) {
     const stateResult = hasEnded(state)
     if (stateResult != -2) {
         return [stateResult, -1, -1]
@@ -100,7 +100,7 @@ function test(state, turn, parent) {
     for (let a = 0; a < actions_list.length; a++) {
         const nodeState = doMove(state, turn, actions_list[a][0], actions_list[a][1])
         const node = new Node(nodeState, parent, turn, actions_list[a][0], actions_list[a][1])
-        const nodeVal = test(nodeState, turn * -1, node)
+        const nodeVal = think(nodeState, turn * -1, node)
         if (turn == 1 && nodeVal[0] > action_value) {
             action_value = nodeVal[0]
             action_i = a
@@ -157,7 +157,7 @@ while ((result = hasEnded(game)) == -2) {
     } else {
         console.log("AI Move")
 
-        let analysis = test(game, turn, null)
+        let analysis = think(game, turn, null)
         game = doMove(game, turn, analysis[1], analysis[2])
     }
     displayGame()
