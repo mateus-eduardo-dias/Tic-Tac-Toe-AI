@@ -115,6 +115,7 @@ function think(state, turn, parent) {
 
 
 let turn = 1
+let turns_played = 0
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -157,11 +158,21 @@ while ((result = hasEnded(game)) == -2) {
     } else {
         console.log("AI Move")
 
-        let analysis = think(game, turn, null)
-        game = doMove(game, turn, analysis[1], analysis[2])
+        if (turns_played == 0) {
+            let move = Math.round(Math.random() * 8)
+            let row = Math.floor(move / 3)
+            let col = (move / 3 - row) * 3
+            if (row >= 0 && row <= 2 && col >= 0 && col <= 2) {
+                game = doMove(game, turn, row, col)
+            }
+        } else {
+            let analysis = think(game, turn, null)
+            game = doMove(game, turn, analysis[1], analysis[2])
+        }
     }
     displayGame()
     turn *= -1
+    turns_played += 1
 }
 
 if (result == 0) {
